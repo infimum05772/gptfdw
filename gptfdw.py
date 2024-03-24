@@ -24,9 +24,9 @@ class gptfdw(ForeignDataWrapper):
         temp = DEFAULT_TEMP
         for qual in quals:
             if qual.field_name == 'query' and qual.operator == '=':
-                query = str(qual.value)
+                query = qual.value
             if qual.field_name == 'temp' and qual.operator == '=':
-                temp = float(qual.value)
+                temp = qual.value
 
         if self.access_token == '':
             log_to_postgres('NOT AUTHORIZED')
@@ -44,7 +44,9 @@ class gptfdw(ForeignDataWrapper):
         j = json.loads(r.data)
         rows = []
         try:
-            row = {'content': j['choices'][0]['message']['content'],
+            row = {'query': query,
+                   'temp': temp,
+                   'content': j['choices'][0]['message']['content'],
                    'model': j['model'],
                    'prompt_tokens': j['usage']['prompt_tokens'],
                    'completion_tokens': j['usage']['completion_tokens'],
