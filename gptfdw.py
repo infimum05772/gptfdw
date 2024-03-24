@@ -24,9 +24,9 @@ class gptfdw(ForeignDataWrapper):
         temp = DEFAULT_TEMP
         for qual in quals:
             if qual.field_name == 'query' and qual.operator == '=':
-                query = qual.value
+                query = str(qual.value)
             if qual.field_name == 'temp' and qual.operator == '=':
-                temp = qual.value
+                temp = float(qual.value)
 
         if self.access_token == '':
             log_to_postgres('NOT AUTHORIZED')
