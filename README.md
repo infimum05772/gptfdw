@@ -68,3 +68,9 @@ SELECT * FROM gptfdw WHERE query='give me some cat names' and temp=1.7;
                         |      |                        | 19. Hazel  +|               |                   |              |
                         |      |                        | 20. Oscar   |               |                   |              |
 ```
+```
+SELECT error FROM gptfdw WHERE temp=63;
+                          error
+---------------------------------------------------------
+ 400 63 is greater than the maximum of 2 - 'temperature'
+```
