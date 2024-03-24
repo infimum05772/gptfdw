@@ -52,6 +52,8 @@ class gptfdw(ForeignDataWrapper):
                    'completion_tokens': j['usage']['completion_tokens'],
                    'total_tokens': j['usage']['total_tokens']}
         except KeyError:
-            row = {'error': j['error']['message']}
+            row = {'query': query,
+                   'temp': temp,
+                   'error': j['error']['message']}
         rows.append(row)
         return rows
