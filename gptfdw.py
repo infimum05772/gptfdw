@@ -6,6 +6,7 @@ from multicorn.utils import log_to_postgres
 
 BASE_URL = "https://bothub.chat/api/v1/openai/v1/chat/completions"
 MODEL = "gpt-3.5-turbo-16k"
+DEFAULT_TEMP = 0.7
 
 
 class gptfdw(ForeignDataWrapper):
@@ -19,11 +20,19 @@ class gptfdw(ForeignDataWrapper):
         log_to_postgres(quals)
 
         query = 'Hello! How are you?'
+        temp = DEFAULT_TEMP
         for qual in quals:
             if qual.field_name == 'query' and qual.operator == '=':
                 query = qual.value
+            if qual.field_name == 'temp' and qual.operator == '=':
+                temp = qual.value
 
-        body = json.dumps({'messages': [{'role': 'user', 'content': query}], 'model': MODEL})
+        if self.access_token == '':
+            log_to_postgres('NOT AUTHORIZED')
+
+        body = json.dumps({'model': MODEL,
+                           'messages': [{'role': 'user', 'content': query}],
+                           'temperature': temp})
         headers = {'Content-Type': 'application/json',
                    'Accept': 'application/json',
                    'Accept-Charset': 'utf-8',
@@ -33,6 +42,13 @@ class gptfdw(ForeignDataWrapper):
 
         j = json.loads(r.data)
         rows = []
-        row = {'content': j['choices'][0]['message']['content']}
+        try:
+            row = {'content': j['choices'][0]['message']['content'],
+                   'model': j['model'],
+                   'prompt_tokens': j['usage']['prompt_tokens'],
+                   'completion_tokens': j['usage']['completion_tokens'],
+                   'total_tokens': j['usage']['total_tokens']}
+        except KeyError:
+            row = {'error': j['error']['message']}
         rows.append(row)
         return rows
