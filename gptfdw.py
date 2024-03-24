@@ -6,6 +6,7 @@ from multicorn.utils import log_to_postgres
 
 BASE_URL = "https://bothub.chat/api/v1/openai/v1/chat/completions"
 MODEL = "gpt-3.5-turbo-16k"
+DEFAULT_QUERY = 'Hello! How are you?'
 DEFAULT_TEMP = 0.7
 
 
@@ -19,7 +20,7 @@ class gptfdw(ForeignDataWrapper):
         http = urllib3.PoolManager()
         log_to_postgres(quals)
 
-        query = 'Hello! How are you?'
+        query = DEFAULT_QUERY
         temp = DEFAULT_TEMP
         for qual in quals:
             if qual.field_name == 'query' and qual.operator == '=':
