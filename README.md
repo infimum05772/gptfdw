@@ -1,0 +1,51 @@
+# gptfdw  
+
+PostreSQL FDW for ChatGPT (BotHub).  
+- This FDW supports single requests to OpenAI ChatGPT;
+- Model is gpt-3.5-turbo-16k;
+- You need to apply your own access token on <a href='https://bothub.chat/'>BotHub</a>;
+## Installation (Ubuntu)
+This FDW is based on <a href='https://github.com/pgsql-io/multicorn2'>Multicorn2</a>.  
+Installation is pretty easy, just follow the steps below:
+1. Firstly you need to install <a href='https://github.com/pgsql-io/multicorn2'>Multicorn2</a>.   
+2. Then clone this repo:
+```
+$ git clone https://github.com/infimum05772/gptfdw
+```
+3. After that copy **gptfdw.py** into your multicorn folder:
+```
+$ cp gptfdw/gptfdw.py [multicorn folder]
+```
+## PostgresSQL
+- Replace access token with your token.
+```
+create extension multicorn;
+
+CREATE SERVER gptfdw_srv FOREIGN DATA WRAPPER multicorn 
+OPTIONS ( wrapper 'multicorn.gptfdw.gptfdw', 
+                   access_token 'your token' );
+                  
+CREATE FOREIGN TABLE gptfdw ( 
+  query text,
+  temp real,
+  model text, 
+  content text, 
+  prompt_tokens int,   
+  completion_tokens int,
+  total_tokens int,
+  error text
+) SERVER gptfdw_srv;
+```
+## Sample queries
+```
+SELECT * FROM gptfdw where query='hello';
+ query | temp |         model          |              content               | prompt_tokens | completion_tokens | total_tokens | error
+-------+------+------------------------+------------------------------------+---------------+-------------------+--------------+-------
+ hello |  0.7 | gpt-3.5-turbo-16k-0613 | Hello! How can I assist you today? |             8 |                 9 |           17 |
+```
+```
+SELECT * FROM gptfdw where query='give me some cat name' and temp=1.7;
+```
+```
+SELECT error FROM gptfdw where temp=63;
+```
